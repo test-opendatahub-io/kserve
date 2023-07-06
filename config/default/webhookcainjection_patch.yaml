@@ -1,11 +1,11 @@
-# This patch add annotation to admission webhook config and
-# the variables $(CERTIFICATE_NAMESPACE) and $(CERTIFICATE_NAME) will be substituted by kustomize.
+# This patch add annotations to admission webhook config
+# to inject the CA bundle using OpenShift's service serving certificates 
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: inferenceservice.serving.kserve.io
   annotations:
-    cert-manager.io/inject-ca-from: $(kserveNamespace)/serving-cert
+    service.beta.openshift.io/inject-cabundle: "true"
 webhooks:
   - name: inferenceservice.kserve-webhook-server.defaulter
 ---
@@ -14,7 +14,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: inferenceservice.serving.kserve.io
   annotations:
-    cert-manager.io/inject-ca-from: $(kserveNamespace)/serving-cert
+    service.beta.openshift.io/inject-cabundle: "true"
 webhooks:
   - name: inferenceservice.kserve-webhook-server.validator
 ---
@@ -23,7 +23,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: trainedmodel.serving.kserve.io
   annotations:
-    cert-manager.io/inject-ca-from: $(kserveNamespace)/serving-cert
+    service.beta.openshift.io/inject-cabundle: "true"
 webhooks:
   - name: trainedmodel.kserve-webhook-server.validator
 ---
@@ -32,6 +32,15 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: inferencegraph.serving.kserve.io
   annotations:
-    cert-manager.io/inject-ca-from: $(kserveNamespace)/serving-cert
+    service.beta.openshift.io/inject-cabundle: "true"
 webhooks:
   - name: inferencegraph.kserve-webhook-server.validator
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kserve-webhook-server-service
+  namespace: kserve
+  annotations:
+    service.beta.openshift.io/serving-cert-secret-name: kserve-webhook-server-cert
+
