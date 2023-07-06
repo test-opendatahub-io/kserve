@@ -19,6 +19,7 @@ bases:
 - ../manager
 - ../webhook
 # - ../certmanager # not needed, because ODH is using OpenShift's serving certificates for WebHooks
+- network-policies.yaml # ODH specific
 
   # Protect the /metrics endpoint by putting it behind auth.
   # Only one of manager_auth_proxy_patch.yaml and
@@ -31,7 +32,7 @@ bases:
 #- manager_prometheus_metrics_patch.yaml
 patchesStrategicMerge:
 - manager_image_patch.yaml
-- manager_auth_proxy_patch.yaml
+#- manager_auth_proxy_patch.yaml
 - webhookcainjection_patch.yaml
 - manager_resources_patch.yaml
 - inferenceservice_conversion_webhook.yaml
