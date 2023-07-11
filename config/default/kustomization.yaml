@@ -4,6 +4,10 @@ kind: Kustomization
 # Adds namespace to all resources.
 namespace: kserve
 
+# Add recommended Kubernetes labels
+commonLabels:
+  app.kubernetes.io/part-of: kserve
+
 # Labels to add to all resources and selectors.
 #commonLabels:
 #  app.kubernetes.io/name: kserve
@@ -14,7 +18,8 @@ bases:
 - ../rbac
 - ../manager
 - ../webhook
-- ../certmanager
+# - ../certmanager # not needed, because ODH is using OpenShift's serving certificates for WebHooks
+- network-policies.yaml # ODH specific
 
   # Protect the /metrics endpoint by putting it behind auth.
   # Only one of manager_auth_proxy_patch.yaml and
@@ -27,11 +32,33 @@ bases:
 #- manager_prometheus_metrics_patch.yaml
 patchesStrategicMerge:
 - manager_image_patch.yaml
-- manager_auth_proxy_patch.yaml
+#- manager_auth_proxy_patch.yaml
 - webhookcainjection_patch.yaml
 - manager_resources_patch.yaml
 - inferenceservice_conversion_webhook.yaml
 - cainjection_conversion_webhook.yaml
+
+patches:
+  # Since OpenShift serving-certificates are being used,
+  # remove CA bundle placeholders
+  - patch: |-
+      - op: remove
+        path: "/spec/conversion/webhook/clientConfig/caBundle"
+    target:
+      kind: CustomResourceDefinition
+      name: inferenceservices.serving.kserve.io
+  - patch: |-
+      - op: remove
+        path: "/webhooks/0/clientConfig/caBundle"
+      - op: remove
+        path: "/webhooks/1/clientConfig/caBundle"
+    target:
+      kind: MutatingWebhookConfiguration
+  - patch: |-
+      - op: remove
+        path: "/webhooks/0/clientConfig/caBundle"
+    target:
+      kind: ValidatingWebhookConfiguration
 
 generatorOptions:
   disableNameSuffixHash: true
@@ -44,13 +71,13 @@ vars:
     apiVersion: v1
     kind: Service
     name: kserve-webhook-server-service
-- name: kserveNamespace
-  objref:
-    kind: Certificate
-    group: cert-manager.io
-    version: v1
-    name: serving-cert
-  fieldref:
-    fieldpath: metadata.namespace
+#- name: kserveNamespace # not needed, because ODH is using OpenShift's serving certificates for WebHooks
+#  objref:
+#    kind: Certificate
+#    group: cert-manager.io
+#    version: v1
+#    name: serving-cert
+#  fieldref:
+#    fieldpath: metadata.namespace
 configurations:
 - params.yaml
