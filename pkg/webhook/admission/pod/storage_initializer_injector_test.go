@@ -1271,6 +1271,7 @@ func TestCaBundleConfigMapVolumeMountInStorageInitializer(t *testing.T) {
 							},
 							Resources:                resourceRequirement,
 							TerminationMessagePolicy: "FallbackToLogsOnError",
+							SecurityContext:          &v1.SecurityContext{RunAsUser: expectedInitContainerUid},
 							VolumeMounts: []v1.VolumeMount{
 								{
 									Name:      "kserve-provision-location",
@@ -1374,6 +1375,7 @@ func TestCaBundleConfigMapVolumeMountInStorageInitializer(t *testing.T) {
 							},
 							Resources:                resourceRequirement,
 							TerminationMessagePolicy: "FallbackToLogsOnError",
+							SecurityContext:          &v1.SecurityContext{RunAsUser: expectedInitContainerUid},
 							VolumeMounts: []v1.VolumeMount{
 								{
 									Name:      "kserve-provision-location",
@@ -1495,6 +1497,7 @@ func TestCaBundleConfigMapVolumeMountInStorageInitializer(t *testing.T) {
 							},
 							Resources:                resourceRequirement,
 							TerminationMessagePolicy: "FallbackToLogsOnError",
+							SecurityContext:          &v1.SecurityContext{RunAsUser: expectedInitContainerUid},
 							VolumeMounts: []v1.VolumeMount{
 								{
 									Name:      "kserve-provision-location",
@@ -1617,6 +1620,7 @@ func TestCaBundleConfigMapVolumeMountInStorageInitializer(t *testing.T) {
 							},
 							Resources:                resourceRequirement,
 							TerminationMessagePolicy: "FallbackToLogsOnError",
+							SecurityContext:          &v1.SecurityContext{RunAsUser: expectedInitContainerUid},
 							VolumeMounts: []v1.VolumeMount{
 								{
 									Name:      "kserve-provision-location",
@@ -1730,6 +1734,7 @@ func TestCaBundleConfigMapVolumeMountInStorageInitializer(t *testing.T) {
 							},
 							Resources:                resourceRequirement,
 							TerminationMessagePolicy: "FallbackToLogsOnError",
+							SecurityContext:          &v1.SecurityContext{RunAsUser: expectedInitContainerUid},
 							VolumeMounts: []v1.VolumeMount{
 								{
 									Name:      "kserve-provision-location",
@@ -1838,6 +1843,7 @@ func TestCaBundleConfigMapVolumeMountInStorageInitializer(t *testing.T) {
 							},
 							Resources:                resourceRequirement,
 							TerminationMessagePolicy: "FallbackToLogsOnError",
+							SecurityContext:          &v1.SecurityContext{RunAsUser: expectedInitContainerUid},
 							VolumeMounts: []v1.VolumeMount{
 								{
 									Name:      "kserve-provision-location",
