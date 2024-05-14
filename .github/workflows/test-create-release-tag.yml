@@ -1,0 +1,68 @@
+name: TEST - ODH Create Tag and Release with Changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Test Tag name for the new release'
+        required: true
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_BRANCH: ${{ github.ref }}
+    outputs:
+      pr_number: ${{ steps.cpr.outputs.pull-request-number }}
+      pr_ops: ${{ steps.cpr.outputs.pull-request-operation}}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+          
+      - name: Update params.env with new release version
+        run: |     
+          sed -i 's|:v[0-9.]*\b|:${{ github.event.inputs.tag_name }}|gm' config/overlays/odh/params.env
+      - name: Commit changes
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add config/overlays/odh/params.env
+          git commit -m "Update image refs for odh release."       
+          echo  ${{ env.GITHUB_BRANCH }}
+          
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        id: cpr
+        with:
+          commit-message: update changelog
+          title: Update images for ${{ github.event.inputs.tag_name }}
+          body: Update images for ${{ github.event.inputs.tag_name }}
+          branch: ${{ env.GITHUB_BRANCH }}
+          base: main
+
+  merge-pr:
+    needs: [ create-pr ]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Generate github-app token
+        id: app-token
+        uses: getsentry/action-github-app-token@v2
+        with:
+          app_id: ${{ secrets.DEVOPS_APP_ID }}
+          private_key: ${{ secrets.DEVOPS_APP_PRIVATE_KEY }}    
+      - name: Enable Pull Request Automerge
+        if: needs.create-pr.outputs.outputs.pr_ops == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v6
+        with:
+          token: ${{ steps.app-token.outputs.token  }}
+          pull-request-number: ${{ needs.create-pr.outputs.pr_number }}
+          merge-method: merge
+
+  
