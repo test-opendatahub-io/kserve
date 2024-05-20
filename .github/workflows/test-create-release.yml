@@ -29,13 +29,13 @@ jobs:
 
       - name: Update params.env with new release version
         run: |     
-          sed -i 's|:v[0-9.]*\b|:${{ github.event.inputs.tag_name }}|gm' config/params.env
+          sed -i 's|:v[0-9.]*\b|:${{ github.event.inputs.tag_name }}|gm' config/overlays/odh/params.env
       
       - name: Commit changes
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add config/params.env
+          git add config/overlays/odh/params.env
           git commit -m "Update image refs for odh release."
 
       - name: Create Pull Request
