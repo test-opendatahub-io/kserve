@@ -93,7 +93,7 @@ jobs:
           pr_number=$(echo "$PR_URL" | grep -o -E '[0-9]+$')
           echo "pr_number=${pr_number}" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ github.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
   
 
   wait-checks:
@@ -110,7 +110,7 @@ jobs:
         run:
           gh pr checks  ${{ needs.create-pr.outputs.pr_number }}  --watch --fail-fast 
         env:     
-          GH_TOKEN: ${{ github.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
   
   comment-lgtm:
     needs: [ check-prev-tag,create-pr,wait-checks ]
@@ -127,7 +127,7 @@ jobs:
           gh pr comment ${{ needs.create-pr.outputs.pr_number }} --body "/lgtm"
           gh pr edit ${{ needs.create-pr.outputs.pr_number }} --add-label lgtm
         env:
-          GH_TOKEN: ${{ github.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
   wait-lgtm:
     runs-on: ubuntu-latest
@@ -162,7 +162,7 @@ jobs:
             exit 1
           fi
         env:
-          GH_TOKEN: ${{ github.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
   merge-pr:
     needs: [ check-prev-tag,create-pr,wait-checks,comment-lgtm,wait-lgtm ]
@@ -177,7 +177,7 @@ jobs:
          run: |
           gh pr merge ${{ needs.create-pr.outputs.pr_number }} --merge --auto
          env:
-          GH_TOKEN: ${{ github.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
   changelog:
     name: Changelog
@@ -202,7 +202,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          token: ${{ github.PAT_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           tag_name: ${{ github.event.inputs.tag_name }}
           prerelease: false
           draft: false
