@@ -1,4 +1,4 @@
-name: Trigger build on PR and Create Tag and Release with Changelog
+name: WIth LGTM Trigger build on PR and Create Tag and Release with Changelog
 
 on:
   workflow_dispatch:
