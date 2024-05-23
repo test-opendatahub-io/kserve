@@ -157,6 +157,10 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
       - name: Create Tag
         id: create_tag
         run: |
