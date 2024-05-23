@@ -82,6 +82,7 @@ jobs:
           BRANCH_NAME="update-param-env-${{ github.event.inputs.tag_name }}"
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME
       - name: Update params.env with new release version
         run: |     
           sed -i 's|:v[0-9.]*\b|:${{ github.event.inputs.tag_name }}|gm'  config/overlays/odh/params.env
@@ -89,7 +90,8 @@ jobs:
         run: |
           git add  config/overlays/odh/params.env
           git commit -m "Update image refs for odh release"
-          git pull --rebase origin $BRANCH_NAME
+          git fetch origin $BRANCH_NAME
+          git rebase origin/$BRANCH_NAME
           git push origin $BRANCH_NAME
       - name: Create Pull Request
         id: create-pull-request
