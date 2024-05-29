@@ -164,24 +164,24 @@ jobs:
 
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
-  merge-pr:
-    needs: [ check-prev-tag,create-pr,wait-checks,comment-lgtm,wait-lgtm ]
-    runs-on: ubuntu-latest
-    steps:
-       - name: Checkout code
-         uses: actions/checkout@v4
-         with:
-          ref: ${{ github.ref }}
-       - name: Merge PR if LGTM label exists
-         if: ${{ steps.wait-lgtm.outputs.has_lgtm }} == 'true'
-         run: |
-          gh pr merge ${{ needs.create-pr.outputs.pr_number }} --merge --auto
-         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+  # merge-pr:
+  #   needs: [ check-prev-tag,create-pr,wait-checks,comment-lgtm,wait-lgtm ]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #      - name: Checkout code
+  #        uses: actions/checkout@v4
+  #        with:
+  #         ref: ${{ github.ref }}
+  #      - name: Merge PR if LGTM label exists
+  #        if: ${{ steps.wait-lgtm.outputs.has_lgtm }} == 'true'
+  #        run: |
+  #         gh pr merge ${{ needs.create-pr.outputs.pr_number }} --merge --auto
+  #        env:
+  #         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
   changelog:
     name: Changelog
-    needs: [ check-prev-tag,create-pr,wait-checks,comment-lgtm,wait-lgtm,merge-pr]
+    needs: [ check-prev-tag,create-pr,wait-checks,comment-lgtm,wait-lgtm]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
