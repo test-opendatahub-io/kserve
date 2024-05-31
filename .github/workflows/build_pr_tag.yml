@@ -194,14 +194,14 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: quay.io
-          username: ${{ secrets.QUAY_USER }}
-          password: ${{ secrets.QUAY_PASSWORD }}
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.Q_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t quay.io/${{ secrets.QUAY_USER }}:pr-${{ needs.create-pr.outputs.pr_number }} 
+        run: docker build -t quay.io/${{ secrets.QUAY_USERNAME }}/test:pr-${{ needs.create-pr.outputs.pr_number }} .
 
       - name: Push Docker image
-        run: docker push quay.io/${{ secrets.QUAY_USER }}:pr-${{ needs.create-pr.outputs.pr_number }}
+        run: docker push quay.io/${{ secrets.QUAY_USERNAME }}/test:pr-${{ needs.create-pr.outputs.pr_number }}
 
     
       - uses: peter-evans/find-comment@v3
@@ -220,7 +220,7 @@ jobs:
           body: |
             PR image build and manifest generation completed successfully!
             
-            📦 [PR image](https://quay.io//jooholee:${{ github.event.pull_request.head.sha }}): `quay.io//jooholee:${{ github.event.pull_request.head.sha }}`
+            📦 [PR image](https://quay.io/rpancham/test:pr-${{ needs.create-pr.outputs.pr_number }}: `quay.io/rpancham/test:pr-${{ needs.create-pr.outputs.pr_number }}`
 
   changelog:
     name: Changelog
