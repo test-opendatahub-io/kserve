@@ -222,6 +222,24 @@ jobs:
             
             📦 [PR image](https://quay.io/rpancham/test:pr-${{ needs.create-pr.outputs.pr_number }}: `quay.io/rpancham/test:pr-${{ needs.create-pr.outputs.pr_number }}`
 
+      - name: pull image (with retry)
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          shell: bash
+          command: docker pull https://quay.io/rpancham/test:pr-${{ needs.create-pr.outputs.pr_number }}
+      - name: tag image with new tag name
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          shell: bash
+          command: |
+             docker tag https://quay.io/rpancham/test:pr-${{ needs.create-pr.outputs.pr_number }} https://quay.io/rpancham/test:${{ github.event.inputs.tag_name }}
+             docker push https://quay.io/${{ secrets.QUAY_USERNAME }}/test:${{ github.event.inputs.tag_name }}
+
+
   changelog:
     name: Changelog
     needs: [ check-prev-tag,create-pr,wait-checks,comment-lgtm,wait-lgtm,docker-build]
