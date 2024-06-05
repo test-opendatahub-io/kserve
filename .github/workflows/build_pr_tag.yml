@@ -163,21 +163,6 @@ jobs:
         env:
 
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-  # merge-pr:
-  #   needs: [ check-prev-tag,create-pr,wait-checks,comment-lgtm,wait-lgtm ]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #      - name: Checkout code
-  #        uses: actions/checkout@v4
-  #        with:
-  #         ref: ${{ github.ref }}
-  #      - name: Merge PR if LGTM label exists
-  #        if: ${{ steps.wait-lgtm.outputs.has_lgtm }} == 'true'
-  #        run: |
-  #         gh pr merge ${{ needs.create-pr.outputs.pr_number }} --merge --auto
-  #        env:
-  #         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
   
   docker-build:
     needs: [ check-prev-tag,create-pr,wait-checks,comment-lgtm,wait-lgtm]
@@ -222,11 +207,42 @@ jobs:
             
             📦 [PR image](https://quay.io/rpancham/test:pr-${{ needs.create-pr.outputs.pr_number }}: `quay.io/rpancham/test:pr-${{ needs.create-pr.outputs.pr_number }}`
 
+  # merge-pr:
+  #   needs: [ check-prev-tag,create-pr,wait-checks,comment-lgtm,wait-lgtm ]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #      - name: Checkout code
+  #        uses: actions/checkout@v4
+  #        with:
+  #         ref: ${{ github.ref }}
+      - name: Merge PR if LGTM label exists
+        if: ${{ steps.wait-lgtm.outputs.has_lgtm }} == 'true'
+        run: |
+         gh pr merge ${{ needs.create-pr.outputs.pr_number }} --merge --auto
+        env:
+         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+      - name: Wait for PR to be merged
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 60
+          max_attempts: 60
+          retry_wait_seconds: 120
+          shell: bash
+          command: |
+            PR_STATUS=$(gh pr view ${{ github.event.client_payload.pr_number }} --json state --jq '.state')
+            echo "PR Status: $PR_STATUS"
+            if [ "$PR_STATUS" != "MERGED" ]; then
+              echo "PR is not yet merged. Retrying..."
+              exit 1
+            fi
+
       - name: pull image (with retry)
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 2
           max_attempts: 3
+          retry_wait_seconds: 120
           shell: bash
           command: docker pull quay.io/${{ secrets.QUAY_USERNAME }}/test:pr-${{ needs.create-pr.outputs.pr_number }}
       - name: tag image with new tag name
@@ -234,6 +250,7 @@ jobs:
         with:
           timeout_minutes: 2
           max_attempts: 3
+          retry_wait_seconds: 120
           shell: bash
           command: |
              docker tag quay.io/${{ secrets.QUAY_USERNAME }}/test:pr-${{ needs.create-pr.outputs.pr_number }} quay.io/${{ secrets.QUAY_USERNAME }}/test:${{ github.event.inputs.tag_name }}
