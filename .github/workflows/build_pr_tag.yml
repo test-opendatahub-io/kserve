@@ -236,8 +236,8 @@ jobs:
               echo "PR is not yet merged. Retrying..."
               exit 1
             fi
-             env:
-               GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: pull image (with retry)
         uses: nick-fields/retry@v3
